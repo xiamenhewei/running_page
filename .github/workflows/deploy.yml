@@ -33,6 +33,9 @@ jobs:
 
       - name: Build
         run: pnpm run build
+        env:
+          # 部署在 Pages 子路径 /running_page/ 下，静态资源引用必须带此前缀，否则 JS/CSS 404
+          PATH_PREFIX: /running_page
 
       - uses: actions/upload-pages-artifact@v3
         with:
