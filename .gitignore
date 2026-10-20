@@ -9,4 +9,3 @@ __pycache__/
 # 运行数据不入库（数据走 GPX_OUT 源文件）
 run_page/data.db
 run_page/data.db-journal
-src/static/activities.json
