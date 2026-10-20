@@ -1,0 +1,51 @@
+# 跑步主页自动构建：GPX_OUT 里的源数据 → 解析入库 → 前端 build → 发布 GitHub Pages
+# 为什么全流程放 Actions：本地 Mac 的 rolldown 原生模块有兼容 bug，Linux 构建环境是该项目大量用户验证过的路径
+name: Deploy Running Page
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Sync GPX data
+        run: python run_page/gpx_sync.py
+
+      - name: Install frontend deps
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - uses: actions/deploy-pages@v4
